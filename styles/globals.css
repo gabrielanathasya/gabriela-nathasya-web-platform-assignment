@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-html,
+/* html,
 body {
   padding: 0;
   margin: 0;
@@ -17,4 +17,59 @@ a {
 
 * {
   box-sizing: border-box;
+} */
+
+.btn-primary {
+  color: black;
+  background-color: #d6b589 !important;
+  border-color: #d6b589 !important;
+}
+
+.page-item.active .page-link {
+  color: black;
+  background-color: #d6b589;
+  border-color: #d6b589;
+  z-index: -1;
+}
+.page-link {
+  color: black;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+/* button on modal for preview attachment */
+.attch-prev {
+  color: black;
+  background: #cbcbcb;
+  text-decoration: none !important;
+}
+.attch-prev:hover {
+  color: black;
+}
+/* .custom-file {
+  z-index: -1;
+} */
+
+/* For React-icons size */
+.icon-lg {
+  font-size: 2.5em;
+}
+.icon-md {
+  font-size: 2em;
+}
+.icon-sm {
+  font-size: 1.5em;
+}
+.icon-xs {
+  font-size: 1em;
+}
+
+/* modal width */
+.modal-90w {
+  max-width: 90% !important;
+}
+.modal-75w {
+  max-width: 75% !important;
 }
