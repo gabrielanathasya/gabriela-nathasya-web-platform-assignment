@@ -1,9 +1,9 @@
 import React from "react"
-import { Container, Form, Row, Col } from "react-bootstrap"
+import { Container, Form, Row, Col, Button } from "react-bootstrap"
 import Image from "next/image"
 import { useState } from "react"
 import { useAppState } from "data/overmind"
-import { IoAddCircle } from "react-icons/io5"
+import { IoAdd } from "react-icons/io5"
 
 const crossIcon = "/static/images/cross_icon.svg"
 
@@ -89,11 +89,9 @@ const MultipleInput = ({
               />
             </Col>
             <Col className="d-flex  align-items-center">
-              <IoAddCircle
-                className="icon-sm"
-                style={{ cursor: "pointer" }}
-                onClick={handleAdd}
-              />
+              <Button type="button" onClick={handleAdd}>
+                <IoAdd className="icon-sm" />
+              </Button>
             </Col>
           </Row>
         </Col>

@@ -263,10 +263,10 @@ export const CustomTable = ({
           }}
           className="font-weight-bold p-3"
         >
-          <Col xs={3} className="cellHeader">
+          <Col xs={5} className="cellHeader">
             {tableHead[0]}
           </Col>
-          <Col xs={9} className="cellHeader">
+          <Col xs={7} className="cellHeader">
             {tableHead[1]}
           </Col>
         </Row>
@@ -287,13 +287,13 @@ export const CustomTable = ({
                     }}
                     onClick={() => handleOpenTableDetail(key)}
                   >
-                    <Col xs={3} className="cell">
+                    <Col xs={5} className="cell">
                       {row.rowData[0]}
                     </Col>
                     <Col xs={6} className="cell">
                       {row.rowData[1]}
                     </Col>
-                    <Col xs={3} className="cell p-0">
+                    <Col xs={1} className="cell p-0">
                       <IoChevronDownOutline
                         className="icon-sm"
                         style={{

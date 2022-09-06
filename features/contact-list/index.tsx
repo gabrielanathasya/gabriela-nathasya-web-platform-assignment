@@ -1,4 +1,4 @@
-import { useQuery, gql } from "@apollo/client"
+import { useQuery } from "@apollo/client"
 import { Button, Form, Container, Row, Col } from "react-bootstrap"
 import { CustomTable } from "components/CustomTable"
 import { useEffect, useState } from "react"
@@ -19,16 +19,16 @@ const ContactList = () => {
   const [isOpenForm, setIsOpenForm] = useState(false)
   const [editId, setEditId] = useState(null)
   const { dataContact } = state.contact
-
-  const { data: totalData } = useQuery(GET_CONTACT_LIST)
-  const { loading, error, data } = useQuery(GET_CONTACT_LIST, {
-    variables: {
-      limit: size,
-      offset: (page - 1) * size,
-      where: searchTerm
-        ? { first_name: { _like: `%${searchTerm}%` } }
-        : undefined,
-    },
+  const variables = {
+    limit: size,
+    offset: (page - 1) * size,
+    where: searchTerm
+      ? { first_name: { _like: `%${searchTerm}%` } }
+      : undefined,
+  }
+  const { data: totalData, refetch: refetchTotal } = useQuery(GET_CONTACT_LIST)
+  const { loading, error, data, refetch } = useQuery(GET_CONTACT_LIST, {
+    variables,
   })
 
   if (error) {
@@ -50,7 +50,6 @@ const ContactList = () => {
   const handleNext = () => {
     const totalPage = Math.ceil(totalData?.contact?.length / size)
     if (page !== totalPage) {
-      overmindActions.contact.setPaging(page + 1)
       setPage(page + 1)
     }
   }
@@ -64,7 +63,8 @@ const ContactList = () => {
   }
 
   const handleSubmitForm = () => {
-    // fetchContacts()
+    refetch(variables)
+    refetchTotal()
     setIsOpenForm(false)
   }
 

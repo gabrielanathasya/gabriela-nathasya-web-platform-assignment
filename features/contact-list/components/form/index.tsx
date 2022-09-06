@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react"
+import { useMutation } from "@apollo/client"
 import { useAppState, useActions } from "data/overmind"
 import { useFormik } from "formik"
 import { Button, Form, Row, Col } from "react-bootstrap"
 import MultipleInput from "components/MultipleInput"
 import validationSchema from "./validationSchema"
 import { Wrapper } from "./style"
+import SpinnerComponent from "components/Spinner"
+import { INSERT_CONTACT } from "queries/contact"
 
 type ContactFormProps = {
   id: number | string | null
@@ -19,6 +22,12 @@ const ContactForm = ({ id, handleSubmitForm }: ContactFormProps) => {
     lastName: "",
     phones: [],
   })
+  const [insertContact, { data, loading, error }] = useMutation(INSERT_CONTACT)
+
+  if (error) {
+    console.error(`[FAIL INSERT CONTACT ${error.message}]`, error)
+    alert("Insert Contact Failed")
+  }
 
   useEffect(() => {
     if (id) {
@@ -39,6 +48,7 @@ const ContactForm = ({ id, handleSubmitForm }: ContactFormProps) => {
 
     if (values) {
       if (id) {
+        // EDIT
         // overmindActions.cv
         //   .update({ id, user_id: userId, ...values })
         //   .then(() => {
@@ -46,10 +56,17 @@ const ContactForm = ({ id, handleSubmitForm }: ContactFormProps) => {
         //     handleSubmitForm()
         //   })
       } else {
-        // overmindActions.cv.create({ user_id: userId, ...values }).then(() => {
-        //   window?.localStorage?.removeItem("work_values")
-        //   handleSubmitForm()
-        // })
+        // CREATE
+        insertContact({
+          variables: {
+            first_name: values?.firstName,
+            last_name: values?.lastName,
+            phones: values?.phones?.map((phone: any) => ({
+              number: phone,
+            })),
+          },
+        })
+        handleSubmitForm()
       }
     } else {
       alert("Please fill out the form")
@@ -90,6 +107,7 @@ const ContactForm = ({ id, handleSubmitForm }: ContactFormProps) => {
 
   return (
     <Wrapper>
+      {loading && <SpinnerComponent />}
       <Form onSubmit={handleSubmit} className="work-form">
         <Row>
           <Col sm={12} md={6} className="mb-3">
@@ -141,7 +159,7 @@ const ContactForm = ({ id, handleSubmitForm }: ContactFormProps) => {
 
         <Row className="mt-4">
           <Col className="d-flex justify-content-end">
-            <Button className="submit-work-button" type="submit">
+            <Button className="submit-button" type="submit">
               Submit
             </Button>
           </Col>
