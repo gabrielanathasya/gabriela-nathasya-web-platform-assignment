@@ -9,8 +9,8 @@ const client = new ApolloClient({
   // uri: "https://cors-anywhere.herokuapp.com/https://wpe-hiring.tokopedia.net/postgres/v1/graphql",
   // uri: "https://cors-anywhere.herokuapp.com/https://web-tools.tokopedia.com/postgres/v1/graphql",
   // uri: "https://api.spacex.land/graphql/",
-  // uri: "https://web-tools.tokopedia.com/postgres/v1/graphql",
-  uri: "https://wpe-hiring.tokopedia.net/postgres/v1/graphql",
+  uri: "https://web-tools.tokopedia.com/postgres/v1/graphql",
+  // uri: "https://wpe-hiring.tokopedia.net/postgres/v1/graphql",
 
   cache: new InMemoryCache(),
 })
