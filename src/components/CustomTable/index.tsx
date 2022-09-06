@@ -1,26 +1,43 @@
-import Link from "next/link"
-import { Row, Col, Table, Button, Pagination } from "react-bootstrap"
+import { Row, Col, Table, Pagination } from "react-bootstrap"
 import { useEffect, useState } from "react"
 import { Wrapper } from "./style"
-import { IoChevronDownOutline } from "react-icons/io5"
+import {
+  IoChevronDownOutline,
+  IoTrashBin,
+  IoPencil,
+  IoStar,
+} from "react-icons/io5"
 
 type tableHeadProps = {
   item: string
 }
 
+type detailButtonProps = {
+  handleFavourite: (id: any) => void
+  handleEdit: (id: any) => void
+  handleDelete: (id: any) => void
+  id: any
+}
+
 type tableRowProps = {
   data: any
-  id: string | number
+  id: any
   path: string
   detailButton: boolean
+  handleFavourite: (id: any) => void
+  handleEdit: (id: any) => void
+  handleDelete: (id: any) => void
 }
 
 type TableDetailMobileProps = {
   rowData: any
   tableHead: any
   detailButton: boolean
-  id: string | number
+  id: any
   path: string
+  handleFavourite: (id: any) => void
+  handleEdit: (id: any) => void
+  handleDelete: (id: any) => void
 }
 
 type CustomTableProps = {
@@ -36,6 +53,9 @@ type CustomTableProps = {
   children: any
   path: string
   useManualPagination: boolean
+  handleFavourite: (id: any) => void
+  handleEdit: (id: any) => void
+  handleDelete: (id: any) => void
 }
 
 const TableHeadItem = ({ item }: tableHeadProps) => {
@@ -46,7 +66,38 @@ const TableHeadItem = ({ item }: tableHeadProps) => {
   )
 }
 
-const TableRow = ({ data, id, path, detailButton }: tableRowProps) => {
+const DetailButton = ({
+  handleFavourite,
+  handleEdit,
+  handleDelete,
+  id,
+}: detailButtonProps) => {
+  return (
+    <div className="w-full d-flex justify-content-end align-items-centers">
+      <IoStar
+        className="icon-sm detail-button"
+        onClick={() => handleFavourite(id)}
+      />
+      <IoPencil
+        className="icon-sm detail-button"
+        onClick={() => handleEdit(id)}
+      />
+      <IoTrashBin
+        className="icon-sm detail-button"
+        onClick={() => handleDelete(id)}
+      />
+    </div>
+  )
+}
+const TableRow = ({
+  data,
+  id,
+  path,
+  detailButton,
+  handleFavourite,
+  handleEdit,
+  handleDelete,
+}: tableRowProps) => {
   return (
     <tr>
       {data.map((item: any, key: any) => {
@@ -62,17 +113,19 @@ const TableRow = ({ data, id, path, detailButton }: tableRowProps) => {
       })}
       {detailButton && (
         <td
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            margin: "0",
-          }}
+          className="cellDesktop"
+          // style={{
+          //   display: "flex",
+          //   justifyContent: "center",
+          //   margin: "0",
+          // }}
         >
-          <Link href={path + "/" + id} passHref>
-            <Button id="detail" variant="primary">
-              Detail
-            </Button>
-          </Link>
+          <DetailButton
+            handleFavourite={handleFavourite}
+            handleEdit={handleEdit}
+            handleDelete={handleDelete}
+            id={id}
+          />
         </td>
       )}
     </tr>
@@ -85,6 +138,9 @@ const TableDetailMobile = ({
   detailButton,
   id,
   path,
+  handleFavourite,
+  handleEdit,
+  handleDelete,
 }: TableDetailMobileProps) => {
   return (
     <Row className="d-flex justify-content-center align-items-center">
@@ -108,18 +164,14 @@ const TableDetailMobile = ({
         ))}
       </Col>
       {detailButton && (
-        <Row className="m-0">
-          <Col className="d-flex justify-content-end">
-            <Link href={path + "/" + id} passHref>
-              <Button
-                id="detail"
-                variant="primary"
-                className="font-weight-bold"
-                style={{ fontSize: "13px" }}
-              >
-                Detail
-              </Button>
-            </Link>
+        <Row className="m-0 p-0">
+          <Col className="mt-3 d-flex justify-content-end p-0">
+            <DetailButton
+              handleFavourite={handleFavourite}
+              handleEdit={handleEdit}
+              handleDelete={handleDelete}
+              id={id}
+            />
           </Col>
         </Row>
       )}
@@ -140,6 +192,9 @@ export const CustomTable = ({
   children,
   path,
   useManualPagination,
+  handleFavourite,
+  handleEdit,
+  handleDelete,
 }: CustomTableProps) => {
   let active = current
   let items: any = []
@@ -229,14 +284,14 @@ export const CustomTable = ({
 
   return (
     <Wrapper>
-      <div className="d-none d-lg-block w-full">
+      <div className="d-none d-lg-block w-full p-0">
         <Table striped borderless hover responsive="xl">
           <thead>
             <tr>
               {tableHead.map((data: any) => {
                 return <TableHeadItem key={data} item={data} />
               })}
-              {detailButton && <th>Action</th>}
+              {detailButton && <th></th>}
             </tr>
           </thead>
           <tbody>
@@ -249,6 +304,9 @@ export const CustomTable = ({
                     id={data.id}
                     path={path}
                     detailButton={detailButton}
+                    handleFavourite={handleFavourite}
+                    handleEdit={handleEdit}
+                    handleDelete={handleDelete}
                   />
                 )))}
           </tbody>
@@ -314,6 +372,9 @@ export const CustomTable = ({
                         id={row.id}
                         path={path}
                         detailButton={detailButton}
+                        handleFavourite={handleFavourite}
+                        handleEdit={handleEdit}
+                        handleDelete={handleDelete}
                       />
                     )}
                   </Row>

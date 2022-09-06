@@ -17,7 +17,7 @@ const ContactList = () => {
   const [page, setPage] = useState(1)
   const size = 10
   const [isOpenForm, setIsOpenForm] = useState(false)
-  const [editId, setEditId] = useState(null)
+  const [editId, setEditId] = useState<any>(null)
   const { dataContact } = state.contact
   const variables = {
     limit: size,
@@ -68,14 +68,21 @@ const ContactList = () => {
     setIsOpenForm(false)
   }
 
-  const handleDeleteContact = (id: any) => {
+  const handleFavourite = (id: any) => {
+    console.log("fave", { id })
+    // overmindActions.contact.deleteById({ id }).then(() => {
+    //   fetchContacts()
+    // })
+  }
+
+  const handleDelete = (id: any) => {
     console.log("delete", { id })
     // overmindActions.contact.deleteById({ id }).then(() => {
     //   fetchContacts()
     // })
   }
 
-  const handleEditContact = (id: any) => {
+  const handleEdit = (id: any) => {
     setEditId(id)
     setIsOpenForm(true)
   }
@@ -118,9 +125,12 @@ const ContactList = () => {
             handleNext={() => handleNext()}
             setCurrentPage={(current) => handleClick(current)}
             path={basePath}
-            detailButton={false}
+            detailButton={true}
             children={undefined}
             useManualPagination={false}
+            handleFavourite={handleFavourite}
+            handleEdit={handleEdit}
+            handleDelete={handleDelete}
           />
         </Col>
       </Row>

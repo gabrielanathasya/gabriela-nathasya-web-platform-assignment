@@ -31,14 +31,15 @@ const ContactForm = ({ id, handleSubmitForm }: ContactFormProps) => {
 
   useEffect(() => {
     if (id) {
-      overmindActions.cv.getDetail({ id }).then(() => {
-        const { detailData } = state.contact
-        setInitialValue({
-          firstName: detailData?.firstName || "",
-          lastName: detailData?.lastName || "",
-          phones: detailData?.phones || [],
-        })
-      })
+      // FETCH DETAIL
+      // overmindActions.cv.getDetail({ id }).then(() => {
+      //   const { detailData } = state.contact
+      //   setInitialValue({
+      //     firstName: detailData?.firstName || "",
+      //     lastName: detailData?.lastName || "",
+      //     phones: detailData?.phones || [],
+      //   })
+      // })
     }
   }, [])
 

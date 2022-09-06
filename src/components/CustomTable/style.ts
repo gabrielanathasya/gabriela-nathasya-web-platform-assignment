@@ -20,4 +20,13 @@ export const Wrapper = styled.div`
   thead {
     border-top: solid 2px #dee2e6;
   }
+
+  .detail-button {
+    margin-left: 10px;
+    cursor: pointer;
+  }
+
+  .detail-button:hover {
+    opacity: 0.5;
+  }
 `
