@@ -75,9 +75,11 @@ const ContactForm = ({ id, handleSubmitForm }: ContactFormProps) => {
   } = formik
 
   const handleAddPhone = (phoneValue: string) => {
-    const newArray: any = values?.phones
-    newArray.push(phoneValue)
-    setFieldValue("phones", newArray)
+    if (phoneValue) {
+      const newArray: any = values?.phones
+      newArray.push(phoneValue)
+      setFieldValue("phones", newArray)
+    }
   }
 
   const handleRemovePhone = (index: number) => {

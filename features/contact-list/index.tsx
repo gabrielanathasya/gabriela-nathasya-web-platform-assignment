@@ -42,7 +42,6 @@ const ContactList = () => {
     }
   }, [data, totalData])
 
-  // Handler
   const handlePrev = () => {
     if (page > 1) {
       setPage(page - 1)

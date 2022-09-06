@@ -3,19 +3,8 @@ import { Provider } from "overmind-react"
 import { overmind } from "data/overmind"
 import Head from "next/head"
 
-// import ApolloClient from "apollo-boost"
-// import { ApolloProvider } from "react-apollo"
+import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client"
 
-import {
-  ApolloClient,
-  InMemoryCache,
-  ApolloProvider,
-  HttpLink,
-  ApolloLink,
-  concat,
-} from "@apollo/client"
-
-// const uri = "https://web-tools.tokopedia.com/postgres/v1/graphql"
 const uri = "https://wpe-hiring.tokopedia.net/graphql"
 
 const client = new ApolloClient({
