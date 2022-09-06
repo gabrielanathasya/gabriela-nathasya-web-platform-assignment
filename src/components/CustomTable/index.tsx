@@ -292,7 +292,8 @@ export const CustomTable = ({
                       float: "right",
                       transitionDuration: "0.5s",
                       transitionTimingFunction: "ease",
-                      transform: tableDetailKey === key && "rotate(180deg)",
+                      transform:
+                        tableDetailKey === key ? "rotate(180deg)" : undefined,
                     }}
                   />
                 </Col>
