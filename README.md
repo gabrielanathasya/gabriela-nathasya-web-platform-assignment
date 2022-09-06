@@ -23,6 +23,9 @@ yarn dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+if there is a CORS error when fetching the API, please use the following chrome extension
+[https://chrome.google.com/webstore/detail/allow-cors-access-control/lhobafahddgcelffkeicbaginigeejlf?hl=en](https://chrome.google.com/webstore/detail/allow-cors-access-control/lhobafahddgcelffkeicbaginigeejlf?hl=en)
+
 ## Deployed on Vercel
 
 This project is deployed on Vercel, follow this link to check it out
