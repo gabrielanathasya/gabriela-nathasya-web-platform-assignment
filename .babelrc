@@ -9,7 +9,8 @@
           "features": "./features",
           "utils": "./src/utils/",
           "components": "./src/components",
-          "data": "./src/data"
+          "data": "./src/data",
+          "queries": "./src/queries"
         }
       }
     ],

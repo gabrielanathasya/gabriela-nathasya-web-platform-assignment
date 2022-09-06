@@ -1,49 +1,62 @@
-import _ from "lodash"
+import { useQuery, gql } from "@apollo/client"
 import { Button, Form, Container, Row, Col } from "react-bootstrap"
 import { CustomTable } from "components/CustomTable"
 import { useEffect, useState } from "react"
 import { useAppState, useActions } from "data/overmind"
 import ModalComponent from "components/Modal"
+import SpinnerComponent from "components/Spinner"
 import ContactForm from "./components/form"
-
+import { GET_CONTACT_LIST } from "queries/contact"
 import { debounce } from "utils/debounce"
 
 const ContactList = () => {
   const basePath = "contact"
-
   const state: any = useAppState()
   const overmindActions: any = useActions()
   const [searchTerm, setSearchTerm] = useState("")
+  const [page, setPage] = useState(1)
+  const size = 10
   const [isOpenForm, setIsOpenForm] = useState(false)
   const [editId, setEditId] = useState(null)
-
   const { dataContact } = state.contact
 
-  const params = {
-    filter: searchTerm,
-    page: 1,
-    size: 5,
+  const { data: totalData } = useQuery(GET_CONTACT_LIST)
+  const { loading, error, data } = useQuery(GET_CONTACT_LIST, {
+    variables: {
+      limit: size,
+      offset: (page - 1) * size,
+      where: searchTerm
+        ? { first_name: { _like: `%${searchTerm}%` } }
+        : undefined,
+    },
+  })
+
+  if (error) {
+    console.error(`[FAIL GET CONTACT LIST ${error.message}]`, error)
+    alert("Get List Failed")
   }
 
   useEffect(() => {
-    overmindActions.contact.getContactList(params)
-  }, [])
+    if (data && totalData) {
+      overmindActions.contact.setContactList({ totalData, page, size, data })
+    }
+  }, [data, totalData])
 
   // Handler
   const handlePrev = () => {
-    const current = dataContact.tablePaging.page
-    if (current > 1) {
-      // set current page in overmind
+    if (page > 1) {
+      setPage(page - 1)
     }
   }
   const handleNext = () => {
-    const current = dataContact.tablePaging.page
-    if (current !== dataContact.tablePaging.totalPage) {
-      // set current page in overmind
+    const totalPage = Math.ceil(totalData?.contact?.length / size)
+    if (page !== totalPage) {
+      overmindActions.contact.setPaging(page + 1)
+      setPage(page + 1)
     }
   }
   const handleClick = (current: number) => {
-    // set current page in overmind
+    setPage(current)
   }
 
   const handleAddContact = () => {
@@ -74,6 +87,7 @@ const ContactList = () => {
 
   return (
     <Container className="px-md-5 py-md-5 mt-3">
+      {loading && <SpinnerComponent />}
       <Row className="align-items-center mb-3">
         <Col>
           <h1>Contact List</h1>
@@ -98,14 +112,16 @@ const ContactList = () => {
           <CustomTable
             tableHead={dataContact.tableHead}
             tableBody={dataContact.tableBody}
-            totalPage={dataContact.tablePaging.totalPage}
-            current={dataContact.tablePaging.page}
+            totalPage={Math.ceil(totalData?.contact?.length / size)}
+            current={page}
+            pageSize={size}
             handlePrev={() => handlePrev()}
             handleNext={() => handleNext()}
             setCurrentPage={(current) => handleClick(current)}
             path={basePath}
             detailButton={false}
             children={undefined}
+            useManualPagination={false}
           />
         </Col>
       </Row>

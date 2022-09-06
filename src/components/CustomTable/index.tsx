@@ -28,12 +28,14 @@ type CustomTableProps = {
   tableBody: any
   totalPage: any
   current: number
+  pageSize: number
   handlePrev: () => void
   handleNext: () => void
   setCurrentPage: (current: number) => void
   detailButton: boolean
   children: any
   path: string
+  useManualPagination: boolean
 }
 
 const TableHeadItem = ({ item }: tableHeadProps) => {
@@ -48,7 +50,6 @@ const TableRow = ({ data, id, path, detailButton }: tableRowProps) => {
   return (
     <tr>
       {data.map((item: any, key: any) => {
-        console.log({ item, flag: Array.isArray(item) })
         return (
           <td className="cellDesktop" key={key}>
             {Array.isArray(item)
@@ -131,12 +132,14 @@ export const CustomTable = ({
   tableBody,
   totalPage,
   current,
+  pageSize,
   handlePrev,
   handleNext,
   setCurrentPage,
   detailButton = true,
   children,
   path,
+  useManualPagination,
 }: CustomTableProps) => {
   let active = current
   let items: any = []
@@ -269,45 +272,54 @@ export const CustomTable = ({
         </Row>
         {children ||
           (tableBody &&
-            tableBody.map((row: any, key: any) => (
-              <Row
-                className="p-3"
-                key={key}
-                style={{
-                  cursor: "pointer",
-                  borderTop: "1px solid #DEE2E6",
-                }}
-                onClick={() => handleOpenTableDetail(key)}
-              >
-                <Col xs={3} className="cell">
-                  {row.rowData[0]}
-                </Col>
-                <Col xs={6} className="cell">
-                  {row.rowData[1]}
-                </Col>
-                <Col xs={3} className="cell p-0">
-                  <IoChevronDownOutline
-                    className="icon-sm"
+            tableBody.map((row: any, key: any) => {
+              const flag = useManualPagination
+                ? key > (current - 1) * pageSize - 1 && key < current * pageSize
+                : true
+              if (flag) {
+                return (
+                  <Row
+                    className="p-3"
+                    key={key}
                     style={{
-                      float: "right",
-                      transitionDuration: "0.5s",
-                      transitionTimingFunction: "ease",
-                      transform:
-                        tableDetailKey === key ? "rotate(180deg)" : undefined,
+                      cursor: "pointer",
+                      borderTop: "1px solid #DEE2E6",
                     }}
-                  />
-                </Col>
-                {tableDetailKey === key && (
-                  <TableDetailMobile
-                    rowData={row.rowData}
-                    tableHead={tableHead}
-                    id={row.id}
-                    path={path}
-                    detailButton={detailButton}
-                  />
-                )}
-              </Row>
-            )))}
+                    onClick={() => handleOpenTableDetail(key)}
+                  >
+                    <Col xs={3} className="cell">
+                      {row.rowData[0]}
+                    </Col>
+                    <Col xs={6} className="cell">
+                      {row.rowData[1]}
+                    </Col>
+                    <Col xs={3} className="cell p-0">
+                      <IoChevronDownOutline
+                        className="icon-sm"
+                        style={{
+                          float: "right",
+                          transitionDuration: "0.5s",
+                          transitionTimingFunction: "ease",
+                          transform:
+                            tableDetailKey === key
+                              ? "rotate(180deg)"
+                              : undefined,
+                        }}
+                      />
+                    </Col>
+                    {tableDetailKey === key && (
+                      <TableDetailMobile
+                        rowData={row.rowData}
+                        tableHead={tableHead}
+                        id={row.id}
+                        path={path}
+                        detailButton={detailButton}
+                      />
+                    )}
+                  </Row>
+                )
+              }
+            }))}
       </div>
       <Pagination
         size="sm"
