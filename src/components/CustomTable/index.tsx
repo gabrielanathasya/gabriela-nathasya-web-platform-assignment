@@ -86,9 +86,9 @@ const TableDetailMobile = ({
   path,
 }: TableDetailMobileProps) => {
   return (
-    <Row>
+    <Row className="d-flex justify-content-center align-items-center">
       <Col
-        className="border d-inline-block mt-3 ml-1 mr-1 pt-2 pb-2"
+        className="border w-full d-inline-block mt-3 ml-1 mr-1 pt-2 pb-2"
         style={{ fontSize: "13px" }}
       >
         {rowData.slice(2).map((item: any, index: number) => (

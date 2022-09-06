@@ -29,6 +29,20 @@ const GET_CONTACT_LIST = gql`
   }
 `
 
+const GET_CONTACT_LIST2 = gql`
+  query GetContactList {
+    contact {
+      created_at
+      first_name
+      id
+      last_name
+      phones {
+        number
+      }
+    }
+  }
+`
+
 const LAUNCHES = gql`
   query Launches {
     launches {
@@ -54,30 +68,18 @@ const LAUNCHES = gql`
 
 const Home = () => {
   const router = useRouter()
-  const { loading, error, data } = useQuery(GET_CONTACT_LIST)
+  const { loading, error, data } = useQuery(GET_CONTACT_LIST2)
 
-  // override to profile
-  // useEffect(() => {
-  //   const userId = localStorage.getItem("userId")
+  if (loading) return "Loading..."
+  if (error) return `ERROR! ${error.message}`
 
-  //   if (userId) {
-  //     // view detail
-  //     router.push(`/profile/${userId}`)
-  //   } else {
-  //     // create
-  //     router.push("/profile")
-  //   }
-  // }, [router])
+  return <div>{JSON.stringify(data)}</div>
 
-  // if (loading) return "Loading..."
-  // if (error) return `ERROR! ${error.message}`
-
-  // return <div>{JSON.stringify(data)}</div>
-  return (
-    <div>
-      <ContactList />
-    </div>
-  )
+  // return (
+  //   <div>
+  //     <ContactList />
+  //   </div>
+  // )
 }
 
 export default Home

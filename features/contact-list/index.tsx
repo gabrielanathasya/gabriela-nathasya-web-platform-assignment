@@ -21,39 +21,29 @@ const ContactList = () => {
 
   const params = {
     filter: searchTerm,
-    sortBy: "-createdDate",
     page: 1,
-    size: 10,
+    size: 5,
   }
 
   useEffect(() => {
-    // overmindActions.contact.getList()
+    overmindActions.contact.getContactList(params)
   }, [])
 
   // Handler
   const handlePrev = () => {
     const current = dataContact.tablePaging.page
     if (current > 1) {
-      // overmindActions.contact.getContacts({
-      //   ...params,
-      //   page: dataContact.tablePaging.page - 1
-      // })
+      // set current page in overmind
     }
   }
   const handleNext = () => {
     const current = dataContact.tablePaging.page
     if (current !== dataContact.tablePaging.totalPage) {
-      // overmindActions.contact.getContacts({
-      //   ...params,
-      //   page: dataContact.tablePaging.page + 1
-      // })
+      // set current page in overmind
     }
   }
   const handleClick = (current: number) => {
-    // overmindActions.contact.getContacts({
-    //   ...params,
-    //   page: current
-    // })
+    // set current page in overmind
   }
 
   const handleAddContact = () => {
