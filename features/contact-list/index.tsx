@@ -1,4 +1,4 @@
-import { useQuery } from "@apollo/client"
+import { useQuery, useMutation } from "@apollo/client"
 import { Button, Form, Container, Row, Col } from "react-bootstrap"
 import { CustomTable } from "components/CustomTable"
 import { useEffect, useState } from "react"
@@ -6,7 +6,7 @@ import { useAppState, useActions } from "data/overmind"
 import ModalComponent from "components/Modal"
 import SpinnerComponent from "components/Spinner"
 import ContactForm from "./components/form"
-import { GET_CONTACT_LIST } from "queries/contact"
+import { GET_CONTACT_LIST, DELETE_CONTACT } from "queries/contact"
 import { debounce } from "utils/debounce"
 
 const ContactList = () => {
@@ -26,6 +26,7 @@ const ContactList = () => {
       ? { first_name: { _like: `%${searchTerm}%` } }
       : undefined,
   }
+  const [deleteContact] = useMutation(DELETE_CONTACT)
   const { data: totalData, refetch: refetchTotal } = useQuery(GET_CONTACT_LIST)
   const { loading, error, data, refetch } = useQuery(GET_CONTACT_LIST, {
     variables,
@@ -63,7 +64,13 @@ const ContactList = () => {
   }
 
   const handleSubmitForm = () => {
-    refetch(variables)
+    refetch({
+      limit: size,
+      offset: (page - 1) * size,
+      where: searchTerm
+        ? { first_name: { _like: `%${searchTerm}%` } }
+        : undefined,
+    })
     refetchTotal()
     setIsOpenForm(false)
   }
@@ -76,10 +83,18 @@ const ContactList = () => {
   }
 
   const handleDelete = (id: any) => {
-    console.log("delete", { id })
-    // overmindActions.contact.deleteById({ id }).then(() => {
-    //   fetchContacts()
-    // })
+    deleteContact({
+      variables: { id },
+    }).then(() => {
+      refetch({
+        limit: size,
+        offset: (page - 1) * size,
+        where: searchTerm
+          ? { first_name: { _like: `%${searchTerm}%` } }
+          : undefined,
+      })
+      refetchTotal()
+    })
   }
 
   const handleEdit = (id: any) => {

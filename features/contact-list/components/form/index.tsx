@@ -66,8 +66,9 @@ const ContactForm = ({ id, handleSubmitForm }: ContactFormProps) => {
               number: phone,
             })),
           },
+        }).then(() => {
+          handleSubmitForm()
         })
-        handleSubmitForm()
       }
     } else {
       alert("Please fill out the form")
