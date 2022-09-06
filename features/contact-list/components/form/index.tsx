@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"
-import { useMutation } from "@apollo/client"
+import { useMutation, useQuery } from "@apollo/client"
 import { useAppState, useActions } from "data/overmind"
 import { useFormik } from "formik"
 import { Button, Form, Row, Col } from "react-bootstrap"
@@ -7,7 +7,7 @@ import MultipleInput from "components/MultipleInput"
 import validationSchema from "./validationSchema"
 import { Wrapper } from "./style"
 import SpinnerComponent from "components/Spinner"
-import { INSERT_CONTACT } from "queries/contact"
+import { INSERT_CONTACT, GET_CONTACT_LIST } from "queries/contact"
 
 type ContactFormProps = {
   id: number | string | null
@@ -21,6 +21,20 @@ const ContactForm = ({ id, handleSubmitForm }: ContactFormProps) => {
     firstName: "",
     lastName: "",
     phones: [],
+  })
+  const [tempFirstName, setTempFirstName] = useState("")
+  const [tempLastName, setTempLastName] = useState("")
+
+  const { data: existingData } = useQuery(GET_CONTACT_LIST, {
+    variables: {
+      where:
+        tempFirstName && tempLastName
+          ? {
+              first_name: tempFirstName,
+              last_name: tempLastName,
+            }
+          : undefined,
+    },
   })
   const [insertContact, { data, loading, error }] = useMutation(INSERT_CONTACT)
 
@@ -46,29 +60,37 @@ const ContactForm = ({ id, handleSubmitForm }: ContactFormProps) => {
   const onSubmitForm = (values: any, actions: any) => {
     // actions.setSubmitting(false)
     // e.preventDefault()
+    setTempFirstName(values?.firstName)
+    setTempLastName(values?.lastName)
+
+    console.log(existingData?.contact)
 
     if (values) {
-      if (id) {
-        // EDIT
-        // overmindActions.cv
-        //   .update({ id, user_id: userId, ...values })
-        //   .then(() => {
-        //     window?.localStorage?.removeItem("work_values")
-        //     handleSubmitForm()
-        //   })
+      if (existingData?.contact) {
+        alert("Name must be unique")
       } else {
-        // CREATE
-        insertContact({
-          variables: {
-            first_name: values?.firstName,
-            last_name: values?.lastName,
-            phones: values?.phones?.map((phone: any) => ({
-              number: phone,
-            })),
-          },
-        }).then(() => {
-          handleSubmitForm()
-        })
+        if (id) {
+          // EDIT
+          // overmindActions.cv
+          //   .update({ id, user_id: userId, ...values })
+          //   .then(() => {
+          //     window?.localStorage?.removeItem("work_values")
+          //     handleSubmitForm()
+          //   })
+        } else {
+          // CREATE
+          insertContact({
+            variables: {
+              first_name: values?.firstName,
+              last_name: values?.lastName,
+              phones: values?.phones?.map((phone: any) => ({
+                number: phone,
+              })),
+            },
+          }).then(() => {
+            handleSubmitForm()
+          })
+        }
       }
     } else {
       alert("Please fill out the form")
