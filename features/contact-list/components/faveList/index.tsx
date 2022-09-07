@@ -34,7 +34,12 @@ const FaveContactList = ({
       },
     }
   )
-  const { loading, data, error } = useQuery(GET_CONTACT_LIST, {
+  const {
+    loading,
+    data,
+    error,
+    refetch: refetchFaveList,
+  } = useQuery(GET_CONTACT_LIST, {
     variables: {
       limit: size,
       offset: (page - 1) * size,
@@ -43,17 +48,24 @@ const FaveContactList = ({
   })
 
   if (error) {
-    console.error(`[FAIL GET CONTACT LIST ${error.message}]`, error)
+    // console.error(`[FAIL GET CONTACT LIST ${error.message}]`, error)
     alert("Get List Failed")
   }
 
   useEffect(() => {
     if (data && totalData) {
+      console.log("set fave list", { data })
       overmindActions.contact.setFaveContactList({
         data,
       })
     }
   }, [data, totalData])
+
+  useEffect(() => {
+    if (dataFaveContact?.tableBody?.length === 0) {
+      handlePrev()
+    }
+  }, [dataFaveContact?.tableBody])
 
   const handlePrev = () => {
     if (page > 1) {
@@ -61,7 +73,7 @@ const FaveContactList = ({
     }
   }
   const handleNext = () => {
-    const totalPage = Math.ceil(dataFaveContact?.tablePaging?.totalPage / size)
+    const totalPage = Math.ceil(faveIds?.length / size)
     if (page !== totalPage) {
       setPage(page + 1)
     }
@@ -78,6 +90,14 @@ const FaveContactList = ({
     faveIds = faveIds?.filter((item: any) => item !== id)
     window?.localStorage?.setItem("fave_ids", JSON.stringify(faveIds))
     handleRefetch()
+    refetchTotal({
+      where: { id: { _in: faveIds } },
+    })
+    refetchFaveList({
+      limit: size,
+      offset: (page - 1) * size,
+      where: { id: { _in: faveIds } },
+    })
   }
 
   return (
@@ -94,9 +114,7 @@ const FaveContactList = ({
             <CustomTable
               tableHead={dataFaveContact.tableHead}
               tableBody={dataFaveContact.tableBody}
-              totalPage={Math.ceil(
-                dataFaveContact?.tablePaging?.totalPage / size
-              )}
+              totalPage={Math.ceil(faveIds?.length / size)}
               current={page}
               pageSize={size}
               handlePrev={() => handlePrev()}

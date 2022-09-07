@@ -18,8 +18,8 @@ const ContactList = () => {
   const [page, setPage] = useState(1)
   const size = 10
   const [isOpenForm, setIsOpenForm] = useState(false)
+  const [isOpenModalDelete, setIsOpenModalDelete] = useState(false)
   const [editId, setEditId] = useState<any>(null)
-
   const [faveIds, setFaveIds] = useState([])
 
   const { dataContact } = state.contact
@@ -28,10 +28,11 @@ const ContactList = () => {
     limit: size,
     offset: (page - 1) * size,
     where: searchTerm
-      ? { first_name: { _like: `%${searchTerm}%` }, id: { _nin: faveIds } }
+      ? { first_name: { _ilike: `%${searchTerm}%` }, id: { _nin: faveIds } }
       : { id: { _nin: faveIds } },
   }
-  const [deleteContact] = useMutation(DELETE_CONTACT)
+  const [deleteContact, { loading: loadingDelete, error: errorDelete }] =
+    useMutation(DELETE_CONTACT)
   const { data: totalData, refetch: refetchTotal } = useQuery(
     GET_CONTACT_LIST,
     {
@@ -45,8 +46,13 @@ const ContactList = () => {
   })
 
   if (error) {
-    console.error(`[FAIL GET CONTACT LIST ${error.message}]`, error)
+    // console.error(`[FAIL GET CONTACT LIST ${error.message}]`, error)
     alert("Get List Failed")
+  }
+
+  if (errorDelete) {
+    // console.error(`[FAIL DELETE CONTACT ${errorDelete.message}]`, error)
+    alert("Delete Contact Failed")
   }
 
   useEffect(() => {
@@ -62,6 +68,12 @@ const ContactList = () => {
       })
     }
   }, [data, totalData])
+
+  useEffect(() => {
+    if (dataContact?.tableBody?.length === 0) {
+      handlePrev()
+    }
+  }, [dataContact?.tableBody])
 
   const handlePrev = () => {
     if (page > 1) {
@@ -84,14 +96,19 @@ const ContactList = () => {
   }
 
   const handleRefetch = () => {
+    let faveIds: any = window?.localStorage?.getItem("fave_ids")
+    faveIds = faveIds ? JSON.parse(faveIds) : []
+    setFaveIds(faveIds)
     refetch({
       limit: size,
       offset: (page - 1) * size,
       where: searchTerm
-        ? { first_name: { _like: `%${searchTerm}%` }, id: { _nin: faveIds } }
+        ? { first_name: { _ilike: `%${searchTerm}%` }, id: { _nin: faveIds } }
         : { id: { _nin: faveIds } },
     })
-    refetchTotal()
+    refetchTotal({
+      where: { id: { _nin: faveIds } },
+    })
   }
 
   const handleSubmitForm = () => {
@@ -112,9 +129,20 @@ const ContactList = () => {
   }
 
   const handleDelete = (id: any) => {
+    setEditId(id)
+    setIsOpenModalDelete(true)
+  }
+
+  const handleConfirmDelete = (id: any) => {
     deleteContact({
       variables: { id },
     }).then(() => {
+      let faveIds: any = window?.localStorage?.getItem("fave_ids")
+      faveIds = faveIds ? JSON.parse(faveIds) : []
+      faveIds = faveIds?.filter((item: any) => item !== id)
+      window?.localStorage?.setItem("fave_ids", JSON.stringify(faveIds))
+
+      setFaveIds(faveIds)
       handleRefetch()
     })
   }
@@ -130,7 +158,7 @@ const ContactList = () => {
 
   return (
     <Container className="px-md-5 py-md-5 mt-3">
-      {loading && <SpinnerComponent />}
+      {(loading || loadingDelete) && <SpinnerComponent />}
       <FaveContactList
         handleEdit={handleEdit}
         handleDelete={handleDelete}
@@ -193,8 +221,23 @@ const ContactList = () => {
           confirmButtonText={undefined}
           onConfirm={() => {}}
           body={undefined}
-          isDeleteMode={false}
           isShowFooter={false}
+        />
+      )}
+      {isOpenModalDelete && (
+        <ModalComponent
+          title="Delete Contact"
+          isShow={isOpenModalDelete}
+          body="Are you sure you want to delete this contact?"
+          onCancel={() => setIsOpenModalDelete(false)}
+          onConfirm={() => {
+            setIsOpenModalDelete(false)
+            handleConfirmDelete(editId)
+          }}
+          cancelButtonText="Cancel"
+          confirmButtonText="Confirm"
+          fnCustomBody={undefined}
+          isShowFooter={true}
         />
       )}
     </Container>

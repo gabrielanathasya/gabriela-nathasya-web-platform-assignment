@@ -8,6 +8,7 @@ import validationSchema from "./validationSchema"
 import { Wrapper } from "./style"
 import SpinnerComponent from "components/Spinner"
 import { INSERT_CONTACT, GET_CONTACT_LIST } from "queries/contact"
+import { debounce } from "utils/debounce"
 
 type ContactFormProps = {
   id: number | string | null
@@ -22,26 +23,22 @@ const ContactForm = ({ id, handleSubmitForm }: ContactFormProps) => {
     lastName: "",
     phones: [],
   })
-  const [tempFirstName, setTempFirstName] = useState("")
-  const [tempLastName, setTempLastName] = useState("")
+  const [existingDataState, setExistingDataState] = useState(null)
+  const [firstNameTemp, setFirstNameTemp] = useState("")
+  const [lastNameTemp, setLastNameTemp] = useState("")
 
-  const { data: existingData } = useQuery(GET_CONTACT_LIST, {
-    variables: {
-      where:
-        tempFirstName && tempLastName
-          ? {
-              first_name: tempFirstName,
-              last_name: tempLastName,
-            }
-          : undefined,
-    },
-  })
+  const { data: existingData, refetch: refetchExistingData } =
+    useQuery(GET_CONTACT_LIST)
   const [insertContact, { data, loading, error }] = useMutation(INSERT_CONTACT)
 
   if (error) {
-    console.error(`[FAIL INSERT CONTACT ${error.message}]`, error)
+    // console.error(`[FAIL INSERT CONTACT ${error.message}]`, error)
     alert("Insert Contact Failed")
   }
+
+  // useEffect(() => {
+
+  // }, [existingData])
 
   useEffect(() => {
     if (id) {
@@ -58,40 +55,54 @@ const ContactForm = ({ id, handleSubmitForm }: ContactFormProps) => {
   }, [])
 
   const onSubmitForm = (values: any, actions: any) => {
-    // actions.setSubmitting(false)
-    // e.preventDefault()
-    setTempFirstName(values?.firstName)
-    setTempLastName(values?.lastName)
-
-    console.log(existingData?.contact)
-
     if (values) {
-      if (existingData?.contact) {
-        alert("Name must be unique")
-      } else {
-        if (id) {
-          // EDIT
-          // overmindActions.cv
-          //   .update({ id, user_id: userId, ...values })
-          //   .then(() => {
-          //     window?.localStorage?.removeItem("work_values")
-          //     handleSubmitForm()
-          //   })
-        } else {
-          // CREATE
-          insertContact({
-            variables: {
-              first_name: values?.firstName,
-              last_name: values?.lastName,
-              phones: values?.phones?.map((phone: any) => ({
-                number: phone,
-              })),
-            },
-          }).then(() => {
-            handleSubmitForm()
-          })
-        }
-      }
+      refetchExistingData({
+        where:
+          values?.firstName && values?.lastName
+            ? {
+                first_name: { _like: values?.firstName },
+                last_name: { _like: values?.lastName },
+              }
+            : undefined,
+      }).then(() => {
+        setTimeout(() => {
+          console.log(
+            "existingData",
+            values?.firstName,
+            values?.lastName,
+            existingData?.contact
+          )
+
+          if (existingData?.contact?.length > 0) {
+            console.log("alert")
+
+            alert("Name must be unique")
+          } else {
+            if (id) {
+              // EDIT
+              // overmindActions.cv
+              //   .update({ id, user_id: userId, ...values })
+              //   .then(() => {
+              //     window?.localStorage?.removeItem("work_values")
+              //     handleSubmitForm()
+              //   })
+            } else {
+              // CREATE
+              insertContact({
+                variables: {
+                  first_name: values?.firstName,
+                  last_name: values?.lastName,
+                  phones: values?.phones?.map((phone: any) => ({
+                    number: phone,
+                  })),
+                },
+              }).then(() => {
+                handleSubmitForm()
+              })
+            }
+          }
+        }, 2000)
+      })
     } else {
       alert("Please fill out the form")
     }
@@ -114,6 +125,32 @@ const ContactForm = ({ id, handleSubmitForm }: ContactFormProps) => {
     setFieldValue,
     isSubmitting,
   } = formik
+
+  // useEffect(() => {
+  //   console.log("refetch useeffect", values?.firstName, values?.lastName)
+  //   refetchExistingData({
+  //     where:
+  //       values?.firstName && values?.lastName
+  //         ? {
+  //             first_name: { _like: values?.firstName },
+  //             last_name: { _like: values?.lastName },
+  //           }
+  //         : undefined,
+  //   })
+  // }, [values?.firstName, values?.lastName])
+
+  // useEffect(() => {
+  //   console.log("refetch useeffect", firstNameTemp, lastNameTemp)
+  //   refetchExistingData({
+  //     where:
+  //       firstNameTemp && lastNameTemp
+  //         ? {
+  //             first_name: { _like: firstNameTemp },
+  //             last_name: { _like: lastNameTemp },
+  //           }
+  //         : undefined,
+  //   })
+  // }, [firstNameTemp, lastNameTemp])
 
   const handleAddPhone = (phoneValue: string) => {
     if (phoneValue) {

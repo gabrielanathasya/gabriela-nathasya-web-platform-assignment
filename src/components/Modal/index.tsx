@@ -4,13 +4,12 @@ import { Modal, Button, Row, NavProps } from "react-bootstrap"
 type ModalProps = {
   title: string | undefined
   body: string | undefined
-  fnCustomBody: () => ReactNode
+  fnCustomBody: (() => ReactNode) | undefined
   cancelButtonText: string | undefined
   confirmButtonText: string | undefined
   isShow: boolean
   onCancel: () => void | undefined
   onConfirm: () => void | undefined
-  isDeleteMode: boolean
   isShowFooter: boolean
 }
 
@@ -23,7 +22,6 @@ const ModalComponent = ({
   isShow,
   onCancel,
   onConfirm,
-  isDeleteMode = false,
   isShowFooter = true,
 }: ModalProps) => {
   return (
@@ -42,23 +40,19 @@ const ModalComponent = ({
         {fnCustomBody ? fnCustomBody() : <p>{body}</p>}
       </Modal.Body>
 
-      {isShowFooter && (
+      {isShowFooter && cancelButtonText && confirmButtonText && (
         <Modal.Footer>
-          {cancelButtonText && confirmButtonText && (
-            <Row className={`d-flex ${isDeleteMode ? "flex-row-reverse" : ""}`}>
-              <Button className="mx-1" variant="secondary" onClick={onCancel}>
-                {cancelButtonText}
-              </Button>
-              <Button
-                className="mx-1"
-                type="submit"
-                variant="primary"
-                onClick={onConfirm}
-              >
-                {confirmButtonText}
-              </Button>
-            </Row>
-          )}
+          <Button
+            className="mx-1"
+            type="submit"
+            variant="primary"
+            onClick={onConfirm}
+          >
+            {confirmButtonText}
+          </Button>
+          <Button className="mx-1" variant="secondary" onClick={onCancel}>
+            {cancelButtonText}
+          </Button>
         </Modal.Footer>
       )}
     </Modal>
