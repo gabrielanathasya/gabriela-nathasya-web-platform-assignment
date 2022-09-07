@@ -6,6 +6,7 @@ import { useAppState, useActions } from "data/overmind"
 import ModalComponent from "components/Modal"
 import SpinnerComponent from "components/Spinner"
 import ContactForm from "./components/form"
+import FaveContactList from "./components/faveList"
 import { GET_CONTACT_LIST, DELETE_CONTACT } from "queries/contact"
 import { debounce } from "utils/debounce"
 
@@ -15,7 +16,9 @@ const ContactList = () => {
   const overmindActions: any = useActions()
   const [searchTerm, setSearchTerm] = useState("")
   const [page, setPage] = useState(1)
+  const [favePage, setFavePage] = useState(1)
   const size = 10
+  const faveSize = 5
   const [isOpenForm, setIsOpenForm] = useState(false)
   const [editId, setEditId] = useState<any>(null)
   const { dataContact } = state.contact
@@ -39,7 +42,15 @@ const ContactList = () => {
 
   useEffect(() => {
     if (data && totalData) {
-      overmindActions.contact.setContactList({ totalData, page, size, data })
+      let faveIds = window?.localStorage?.getItem("fave_ids")
+      faveIds = faveIds ? JSON.parse(faveIds) : []
+      overmindActions.contact.setContactList({
+        totalData,
+        page,
+        size,
+        data,
+        faveIds,
+      })
     }
   }, [data, totalData])
 
@@ -77,6 +88,24 @@ const ContactList = () => {
 
   const handleFavourite = (id: any) => {
     console.log("fave", { id })
+
+    let faveIds = window?.localStorage?.getItem("fave_ids")
+    faveIds = faveIds ? JSON.parse(faveIds) : []
+    window?.localStorage?.setItem("fave_ids", JSON.stringify(faveIds))
+
+    // overmindActions.contact.deleteById({ id }).then(() => {
+    //   fetchContacts()
+    // })
+  }
+
+  const handleUnfavourite = (id: any) => {
+    console.log("unfave", { id })
+
+    let faveIds: any = window?.localStorage?.getItem("fave_ids")
+    faveIds = faveIds ? JSON.parse(faveIds) : []
+    faveIds = faveIds?.filter((item: any) => item !== id)
+    window?.localStorage?.setItem("fave_ids", JSON.stringify(faveIds))
+
     // overmindActions.contact.deleteById({ id }).then(() => {
     //   fetchContacts()
     // })
@@ -109,44 +138,51 @@ const ContactList = () => {
   return (
     <Container className="px-md-5 py-md-5 mt-3">
       {loading && <SpinnerComponent />}
-      <Row className="align-items-center mb-3">
-        <Col>
-          <h1>Contact List</h1>
-        </Col>
-        <Col className="d-flex justify-content-end">
-          <Button onClick={handleAddContact}>Add</Button>
-        </Col>
-      </Row>
-      <Row>
-        <Col className="mb-3" lg={6} md={6} sm={12}>
-          <Form.Control
-            type="text"
-            onChange={debounce((e: any) => {
-              setSearchTerm(e.target.value)
-            }, 800)}
-            placeholder="Search"
-          />
-        </Col>
-      </Row>
+      <FaveContactList handleEdit={handleEdit} handleDelete={handleDelete} />
+
       <Row>
         <Col>
-          <CustomTable
-            tableHead={dataContact.tableHead}
-            tableBody={dataContact.tableBody}
-            totalPage={Math.ceil(totalData?.contact?.length / size)}
-            current={page}
-            pageSize={size}
-            handlePrev={() => handlePrev()}
-            handleNext={() => handleNext()}
-            setCurrentPage={(current) => handleClick(current)}
-            path={basePath}
-            detailButton={true}
-            children={undefined}
-            useManualPagination={false}
-            handleFavourite={handleFavourite}
-            handleEdit={handleEdit}
-            handleDelete={handleDelete}
-          />
+          <Row className="align-items-center mb-3">
+            <Col>
+              <h1>Contact List</h1>
+            </Col>
+            <Col className="d-flex justify-content-end">
+              <Button onClick={handleAddContact}>Add</Button>
+            </Col>
+          </Row>
+          <Row>
+            <Col className="mb-3" lg={6} md={6} sm={12}>
+              <Form.Control
+                type="text"
+                onChange={debounce((e: any) => {
+                  setSearchTerm(e.target.value)
+                }, 800)}
+                placeholder="Search"
+              />
+            </Col>
+          </Row>
+          <Row>
+            <Col>
+              <CustomTable
+                tableHead={dataContact.tableHead}
+                tableBody={dataContact.tableBody}
+                totalPage={Math.ceil(totalData?.contact?.length / size)}
+                current={page}
+                pageSize={size}
+                handlePrev={() => handlePrev()}
+                handleNext={() => handleNext()}
+                setCurrentPage={(current) => handleClick(current)}
+                path={basePath}
+                detailButton={true}
+                children={undefined}
+                useManualPagination={false}
+                handleFavourite={handleFavourite}
+                handleEdit={handleEdit}
+                handleDelete={handleDelete}
+                isFave={false}
+              />
+            </Col>
+          </Row>
         </Col>
       </Row>
       {isOpenForm && (

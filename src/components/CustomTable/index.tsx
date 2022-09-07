@@ -6,7 +6,9 @@ import {
   IoTrashBin,
   IoPencil,
   IoStar,
+  IoStarOutline,
 } from "react-icons/io5"
+import EmptySection from "components/EmptySection"
 
 type tableHeadProps = {
   item: string
@@ -17,6 +19,7 @@ type detailButtonProps = {
   handleEdit: (id: any) => void
   handleDelete: (id: any) => void
   id: any
+  isFave: boolean
 }
 
 type tableRowProps = {
@@ -27,6 +30,7 @@ type tableRowProps = {
   handleFavourite: (id: any) => void
   handleEdit: (id: any) => void
   handleDelete: (id: any) => void
+  isFave: boolean
 }
 
 type TableDetailMobileProps = {
@@ -38,6 +42,7 @@ type TableDetailMobileProps = {
   handleFavourite: (id: any) => void
   handleEdit: (id: any) => void
   handleDelete: (id: any) => void
+  isFave: boolean
 }
 
 type CustomTableProps = {
@@ -56,6 +61,7 @@ type CustomTableProps = {
   handleFavourite: (id: any) => void
   handleEdit: (id: any) => void
   handleDelete: (id: any) => void
+  isFave: boolean
 }
 
 const TableHeadItem = ({ item }: tableHeadProps) => {
@@ -71,13 +77,21 @@ const DetailButton = ({
   handleEdit,
   handleDelete,
   id,
+  isFave,
 }: detailButtonProps) => {
   return (
     <div className="w-full d-flex justify-content-end align-items-centers">
-      <IoStar
-        className="icon-sm detail-button"
-        onClick={() => handleFavourite(id)}
-      />
+      {isFave ? (
+        <IoStar
+          className="icon-sm detail-button"
+          onClick={() => handleFavourite(id)}
+        />
+      ) : (
+        <IoStarOutline
+          className="icon-sm detail-button"
+          onClick={() => handleFavourite(id)}
+        />
+      )}
       <IoPencil
         className="icon-sm detail-button"
         onClick={() => handleEdit(id)}
@@ -97,10 +111,11 @@ const TableRow = ({
   handleFavourite,
   handleEdit,
   handleDelete,
+  isFave,
 }: tableRowProps) => {
   return (
     <tr>
-      {data.map((item: any, key: any) => {
+      {data?.map((item: any, key: any) => {
         return (
           <td className="cellDesktop" key={key}>
             {Array.isArray(item)
@@ -125,6 +140,7 @@ const TableRow = ({
             handleEdit={handleEdit}
             handleDelete={handleDelete}
             id={id}
+            isFave={isFave}
           />
         </td>
       )}
@@ -141,6 +157,7 @@ const TableDetailMobile = ({
   handleFavourite,
   handleEdit,
   handleDelete,
+  isFave,
 }: TableDetailMobileProps) => {
   return (
     <Row className="d-flex justify-content-center align-items-center">
@@ -148,7 +165,7 @@ const TableDetailMobile = ({
         className="border w-full d-inline-block mt-3 ml-1 mr-1 pt-2 pb-2"
         style={{ fontSize: "13px" }}
       >
-        {rowData.slice(2).map((item: any, index: number) => (
+        {rowData?.slice(2).map((item: any, index: number) => (
           <Row className="m-1" key={index}>
             <Col xs={6} className="font-weight-bold">
               {tableHead[index + 2]}
@@ -171,6 +188,7 @@ const TableDetailMobile = ({
               handleEdit={handleEdit}
               handleDelete={handleDelete}
               id={id}
+              isFave={isFave}
             />
           </Col>
         </Row>
@@ -195,6 +213,7 @@ export const CustomTable = ({
   handleFavourite,
   handleEdit,
   handleDelete,
+  isFave,
 }: CustomTableProps) => {
   let active = current
   let items: any = []
@@ -282,6 +301,18 @@ export const CustomTable = ({
 
   renderPagination()
 
+  if (tableBody?.length === 0) {
+    return (
+      <EmptySection
+        title="No Contact"
+        desc="There is no contact at the moment."
+        buttonMessage={undefined}
+        isShowButton={false}
+        handleButtonClick={() => {}}
+      />
+    )
+  }
+
   return (
     <Wrapper>
       <div className="d-none d-lg-block w-full p-0">
@@ -300,13 +331,14 @@ export const CustomTable = ({
                 tableBody.map((data: any, key: any) => (
                   <TableRow
                     key={key}
-                    data={data.rowData}
-                    id={data.id}
+                    data={data?.rowData}
+                    id={data?.id}
                     path={path}
                     detailButton={detailButton}
                     handleFavourite={handleFavourite}
                     handleEdit={handleEdit}
                     handleDelete={handleDelete}
+                    isFave={isFave}
                   />
                 )))}
           </tbody>
@@ -346,10 +378,10 @@ export const CustomTable = ({
                     onClick={() => handleOpenTableDetail(key)}
                   >
                     <Col xs={5} className="cell">
-                      {row.rowData[0]}
+                      {row?.rowData[0]}
                     </Col>
                     <Col xs={6} className="cell">
-                      {row.rowData[1]}
+                      {row?.rowData[1]}
                     </Col>
                     <Col xs={1} className="cell p-0">
                       <IoChevronDownOutline
@@ -367,14 +399,15 @@ export const CustomTable = ({
                     </Col>
                     {tableDetailKey === key && (
                       <TableDetailMobile
-                        rowData={row.rowData}
+                        rowData={row?.rowData}
                         tableHead={tableHead}
-                        id={row.id}
+                        id={row?.id}
                         path={path}
                         detailButton={detailButton}
                         handleFavourite={handleFavourite}
                         handleEdit={handleEdit}
                         handleDelete={handleDelete}
+                        isFave={isFave}
                       />
                     )}
                   </Row>
