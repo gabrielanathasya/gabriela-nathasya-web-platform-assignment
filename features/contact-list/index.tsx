@@ -31,19 +31,24 @@ const ContactList = () => {
       ? { first_name: { _ilike: `%${searchTerm}%` }, id: { _nin: faveIds } }
       : { id: { _nin: faveIds } },
   }
-  const [deleteContact, { loading: loadingDelete, error: errorDelete }] =
-    useMutation(DELETE_CONTACT)
+
   const { data: totalData, refetch: refetchTotal } = useQuery(
     GET_CONTACT_LIST,
     {
       variables: {
-        where: { id: { _nin: faveIds } },
+        where: searchTerm
+          ? { first_name: { _ilike: `%${searchTerm}%` }, id: { _nin: faveIds } }
+          : { id: { _nin: faveIds } },
       },
     }
   )
+
   const { loading, error, data, refetch } = useQuery(GET_CONTACT_LIST, {
     variables,
   })
+
+  const [deleteContact, { loading: loadingDelete, error: errorDelete }] =
+    useMutation(DELETE_CONTACT)
 
   if (error) {
     // console.error(`[FAIL GET CONTACT LIST ${error.message}]`, error)
@@ -65,6 +70,7 @@ const ContactList = () => {
     if (data && totalData) {
       overmindActions.contact.setContactList({
         data,
+        totalData,
       })
     }
   }, [data, totalData])

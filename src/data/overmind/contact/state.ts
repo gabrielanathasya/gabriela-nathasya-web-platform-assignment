@@ -1,5 +1,6 @@
 export const state = {
   detailData: null,
+  unfilteredDataContact: [],
   dataContact: {
     tableHead: ["First name", "Last Name", "Phone Number", "Created at"],
     tableBody: [],

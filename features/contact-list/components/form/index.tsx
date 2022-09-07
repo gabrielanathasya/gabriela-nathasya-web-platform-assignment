@@ -7,8 +7,7 @@ import MultipleInput from "components/MultipleInput"
 import validationSchema from "./validationSchema"
 import { Wrapper } from "./style"
 import SpinnerComponent from "components/Spinner"
-import { INSERT_CONTACT, GET_CONTACT_LIST } from "queries/contact"
-import { debounce } from "utils/debounce"
+import { INSERT_CONTACT, GET_CONTACT_DETAIL } from "queries/contact"
 
 type ContactFormProps = {
   id: number | string | null
@@ -23,12 +22,16 @@ const ContactForm = ({ id, handleSubmitForm }: ContactFormProps) => {
     lastName: "",
     phones: [],
   })
-  const [existingDataState, setExistingDataState] = useState(null)
-  const [firstNameTemp, setFirstNameTemp] = useState("")
-  const [lastNameTemp, setLastNameTemp] = useState("")
+  const { unfilteredDataContact } = state.contact
 
-  const { data: existingData, refetch: refetchExistingData } =
-    useQuery(GET_CONTACT_LIST)
+  const { data: detailData, loading: loadingDetail } = useQuery(
+    GET_CONTACT_DETAIL,
+    {
+      variables: {
+        id,
+      },
+    }
+  )
   const [insertContact, { data, loading, error }] = useMutation(INSERT_CONTACT)
 
   if (error) {
@@ -36,73 +39,54 @@ const ContactForm = ({ id, handleSubmitForm }: ContactFormProps) => {
     alert("Insert Contact Failed")
   }
 
-  // useEffect(() => {
-
-  // }, [existingData])
-
   useEffect(() => {
-    if (id) {
-      // FETCH DETAIL
-      // overmindActions.cv.getDetail({ id }).then(() => {
-      //   const { detailData } = state.contact
-      //   setInitialValue({
-      //     firstName: detailData?.firstName || "",
-      //     lastName: detailData?.lastName || "",
-      //     phones: detailData?.phones || [],
-      //   })
-      // })
+    if (detailData) {
+      const phones = detailData?.phones?.map((phone: any) => phone.number)
+      setInitialValue({
+        firstName: detailData?.first_name || "",
+        lastName: detailData?.last_name || "",
+        phones: phones || [],
+      })
     }
-  }, [])
+  }, [detailData])
 
   const onSubmitForm = (values: any, actions: any) => {
     if (values) {
-      refetchExistingData({
-        where:
-          values?.firstName && values?.lastName
-            ? {
-                first_name: { _like: values?.firstName },
-                last_name: { _like: values?.lastName },
-              }
-            : undefined,
-      }).then(() => {
-        setTimeout(() => {
-          console.log(
-            "existingData",
-            values?.firstName,
-            values?.lastName,
-            existingData?.contact
-          )
+      const isExist = unfilteredDataContact?.find(
+        (item: any) =>
+          item?.firstName === values?.firstName &&
+          item?.lastName === values?.lastName
+      )
 
-          if (existingData?.contact?.length > 0) {
-            console.log("alert")
+      console.log("existingData", values?.firstName, values?.lastName, isExist)
 
-            alert("Name must be unique")
-          } else {
-            if (id) {
-              // EDIT
-              // overmindActions.cv
-              //   .update({ id, user_id: userId, ...values })
-              //   .then(() => {
-              //     window?.localStorage?.removeItem("work_values")
-              //     handleSubmitForm()
-              //   })
-            } else {
-              // CREATE
-              insertContact({
-                variables: {
-                  first_name: values?.firstName,
-                  last_name: values?.lastName,
-                  phones: values?.phones?.map((phone: any) => ({
-                    number: phone,
-                  })),
-                },
-              }).then(() => {
-                handleSubmitForm()
-              })
-            }
-          }
-        }, 2000)
-      })
+      if (isExist) {
+        console.log("alert")
+        alert("Name must be unique")
+      } else {
+        if (id) {
+          // EDIT
+          // overmindActions.cv
+          //   .update({ id, user_id: userId, ...values })
+          //   .then(() => {
+          //     window?.localStorage?.removeItem("work_values")
+          //     handleSubmitForm()
+          //   })
+        } else {
+          // CREATE
+          insertContact({
+            variables: {
+              first_name: values?.firstName,
+              last_name: values?.lastName,
+              phones: values?.phones?.map((phone: any) => ({
+                number: phone,
+              })),
+            },
+          }).then(() => {
+            handleSubmitForm()
+          })
+        }
+      }
     } else {
       alert("Please fill out the form")
     }
@@ -126,32 +110,6 @@ const ContactForm = ({ id, handleSubmitForm }: ContactFormProps) => {
     isSubmitting,
   } = formik
 
-  // useEffect(() => {
-  //   console.log("refetch useeffect", values?.firstName, values?.lastName)
-  //   refetchExistingData({
-  //     where:
-  //       values?.firstName && values?.lastName
-  //         ? {
-  //             first_name: { _like: values?.firstName },
-  //             last_name: { _like: values?.lastName },
-  //           }
-  //         : undefined,
-  //   })
-  // }, [values?.firstName, values?.lastName])
-
-  // useEffect(() => {
-  //   console.log("refetch useeffect", firstNameTemp, lastNameTemp)
-  //   refetchExistingData({
-  //     where:
-  //       firstNameTemp && lastNameTemp
-  //         ? {
-  //             first_name: { _like: firstNameTemp },
-  //             last_name: { _like: lastNameTemp },
-  //           }
-  //         : undefined,
-  //   })
-  // }, [firstNameTemp, lastNameTemp])
-
   const handleAddPhone = (phoneValue: string) => {
     if (phoneValue) {
       const newArray: any = values?.phones
@@ -168,7 +126,7 @@ const ContactForm = ({ id, handleSubmitForm }: ContactFormProps) => {
 
   return (
     <Wrapper>
-      {loading && <SpinnerComponent />}
+      {(loading || loadingDetail) && <SpinnerComponent />}
       <Form onSubmit={handleSubmit} className="work-form">
         <Row>
           <Col sm={12} md={6} className="mb-3">

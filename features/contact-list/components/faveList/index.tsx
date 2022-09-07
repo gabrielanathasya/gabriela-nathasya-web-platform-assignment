@@ -1,10 +1,11 @@
-import { Row, Col } from "react-bootstrap"
+import { Row, Col, Form } from "react-bootstrap"
 import { useQuery, useMutation } from "@apollo/client"
 import { CustomTable } from "components/CustomTable"
 import { useEffect, useState } from "react"
 import { useAppState, useActions } from "data/overmind"
 import SpinnerComponent from "components/Spinner"
 import { GET_CONTACT_LIST } from "queries/contact"
+import { debounce } from "utils/debounce"
 
 type FaveContactListProps = {
   handleEdit: (id: any) => void
@@ -22,6 +23,7 @@ const FaveContactList = ({
   const basePath = "contact"
   const state: any = useAppState()
   const overmindActions: any = useActions()
+  const [searchTerm, setSearchTerm] = useState("")
   const [page, setPage] = useState(1)
   const size = 5
   const { dataFaveContact } = state.contact
@@ -30,7 +32,9 @@ const FaveContactList = ({
     GET_CONTACT_LIST,
     {
       variables: {
-        where: { id: { _in: faveIds } },
+        where: searchTerm
+          ? { first_name: { _ilike: `%${searchTerm}%` }, id: { _in: faveIds } }
+          : { id: { _in: faveIds } },
       },
     }
   )
@@ -43,7 +47,9 @@ const FaveContactList = ({
     variables: {
       limit: size,
       offset: (page - 1) * size,
-      where: { id: { _in: faveIds } },
+      where: searchTerm
+        ? { first_name: { _ilike: `%${searchTerm}%` }, id: { _in: faveIds } }
+        : { id: { _in: faveIds } },
     },
   })
 
@@ -107,6 +113,17 @@ const FaveContactList = ({
         <Row className="align-items-center mb-3">
           <Col>
             <h1>Favourite List</h1>
+          </Col>
+        </Row>
+        <Row>
+          <Col className="mb-3" lg={6} md={6} sm={12}>
+            <Form.Control
+              type="text"
+              onChange={debounce((e: any) => {
+                setSearchTerm(e.target.value)
+              }, 800)}
+              placeholder="Search"
+            />
           </Col>
         </Row>
         <Row>
