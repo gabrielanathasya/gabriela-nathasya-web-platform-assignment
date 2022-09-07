@@ -2,7 +2,7 @@ import { useQuery, useMutation } from "@apollo/client"
 import { Button, Form, Container, Row, Col } from "react-bootstrap"
 import { CustomTable } from "components/CustomTable"
 import { useEffect, useState } from "react"
-import { useAppState, useActions } from "data/overmind"
+import { useAppState, useActions, overmind } from "data/overmind"
 import ModalComponent from "components/Modal"
 import SpinnerComponent from "components/Spinner"
 import ContactForm from "./components/form"
@@ -11,7 +11,6 @@ import { GET_CONTACT_LIST, DELETE_CONTACT } from "queries/contact"
 import { debounce } from "utils/debounce"
 
 const ContactList = () => {
-  const basePath = "contact"
   const state: any = useAppState()
   const overmindActions: any = useActions()
   const [searchTerm, setSearchTerm] = useState("")
@@ -97,6 +96,7 @@ const ContactList = () => {
   }
 
   const handleAddContact = () => {
+    overmindActions.contact.resetDetailData()
     setEditId(null)
     setIsOpenForm(true)
   }
@@ -123,8 +123,6 @@ const ContactList = () => {
   }
 
   const handleFavourite = (id: any) => {
-    console.log("fave", { id })
-
     let faveIds: any = window?.localStorage?.getItem("fave_ids")
     faveIds = faveIds ? JSON.parse(faveIds) : []
     faveIds?.push(id)
@@ -147,7 +145,6 @@ const ContactList = () => {
       faveIds = faveIds ? JSON.parse(faveIds) : []
       faveIds = faveIds?.filter((item: any) => item !== id)
       window?.localStorage?.setItem("fave_ids", JSON.stringify(faveIds))
-
       setFaveIds(faveIds)
       handleRefetch()
     })
@@ -189,7 +186,7 @@ const ContactList = () => {
                 onChange={debounce((e: any) => {
                   setSearchTerm(e.target.value)
                 }, 800)}
-                placeholder="Search"
+                placeholder="Search first name..."
               />
             </Col>
           </Row>
@@ -204,7 +201,6 @@ const ContactList = () => {
                 handlePrev={() => handlePrev()}
                 handleNext={() => handleNext()}
                 setCurrentPage={(current) => handleClick(current)}
-                path={basePath}
                 detailButton={true}
                 children={undefined}
                 useManualPagination={false}

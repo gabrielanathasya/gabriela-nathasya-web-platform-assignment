@@ -76,11 +76,16 @@ const MultipleInput = ({
       <Row>
         <Col>
           <Form.Label>{title}</Form.Label>
+          {isViewMode && (
+            <p style={{ fontSize: "12px" }}>
+              will automatically added to this contact{" "}
+            </p>
+          )}
           <Row>
             <Col className="d-flex justify-content-center align-items-center">
               <Form.Control
                 type="text"
-                placeholder="Phone Value"
+                placeholder="Phone Number"
                 name="phoneValue"
                 value={phoneValue}
                 onChange={(e) => {
@@ -88,7 +93,7 @@ const MultipleInput = ({
                 }}
               />
             </Col>
-            <Col className="d-flex  align-items-center">
+            <Col className="d-flex align-items-center">
               <Button type="button" onClick={handleAdd}>
                 <IoAdd className="icon-sm" />
               </Button>

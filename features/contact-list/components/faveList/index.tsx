@@ -20,7 +20,6 @@ const FaveContactList = ({
   handleRefetch,
   faveIds,
 }: FaveContactListProps) => {
-  const basePath = "contact"
   const state: any = useAppState()
   const overmindActions: any = useActions()
   const [searchTerm, setSearchTerm] = useState("")
@@ -60,7 +59,6 @@ const FaveContactList = ({
 
   useEffect(() => {
     if (data && totalData) {
-      console.log("set fave list", { data })
       overmindActions.contact.setFaveContactList({
         data,
       })
@@ -89,8 +87,6 @@ const FaveContactList = ({
   }
 
   const handleUnfavourite = (id: any) => {
-    console.log("unfave", { id })
-
     let faveIds: any = window?.localStorage?.getItem("fave_ids")
     faveIds = faveIds ? JSON.parse(faveIds) : []
     faveIds = faveIds?.filter((item: any) => item !== id)
@@ -122,7 +118,7 @@ const FaveContactList = ({
               onChange={debounce((e: any) => {
                 setSearchTerm(e.target.value)
               }, 800)}
-              placeholder="Search"
+              placeholder="Search first name..."
             />
           </Col>
         </Row>
@@ -137,7 +133,6 @@ const FaveContactList = ({
               handlePrev={() => handlePrev()}
               handleNext={() => handleNext()}
               setCurrentPage={(current) => handleClick(current)}
-              path={basePath}
               detailButton={true}
               children={undefined}
               useManualPagination={false}

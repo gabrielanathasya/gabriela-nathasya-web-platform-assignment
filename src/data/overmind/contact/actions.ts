@@ -23,3 +23,22 @@ export const setFaveContactList = ({ state }: any, { data }: any) => {
     }
   })
 }
+
+export const setDetailData = ({ state }: any, { detailData }: any) => {
+  const { contact_by_pk } = detailData
+
+  const phones = contact_by_pk?.phones?.map((phone: any) => {
+    if (phone?.number) {
+      return phone.number
+    }
+  })
+
+  state.contact.detailData = {
+    ...contact_by_pk,
+    phones,
+  }
+}
+
+export const resetDetailData = ({ state }: any) => {
+  state.contact.detailData = null
+}

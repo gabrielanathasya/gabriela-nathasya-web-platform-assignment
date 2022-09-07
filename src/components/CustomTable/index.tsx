@@ -25,7 +25,6 @@ type detailButtonProps = {
 type tableRowProps = {
   data: any
   id: any
-  path: string
   detailButton: boolean
   handleFavourite: (id: any) => void
   handleEdit: (id: any) => void
@@ -38,7 +37,6 @@ type TableDetailMobileProps = {
   tableHead: any
   detailButton: boolean
   id: any
-  path: string
   handleFavourite: (id: any) => void
   handleEdit: (id: any) => void
   handleDelete: (id: any) => void
@@ -56,7 +54,6 @@ type CustomTableProps = {
   setCurrentPage: (current: number) => void
   detailButton: boolean
   children: any
-  path: string
   useManualPagination: boolean
   handleFavourite: (id: any) => void
   handleEdit: (id: any) => void
@@ -106,7 +103,6 @@ const DetailButton = ({
 const TableRow = ({
   data,
   id,
-  path,
   detailButton,
   handleFavourite,
   handleEdit,
@@ -153,7 +149,6 @@ const TableDetailMobile = ({
   tableHead,
   detailButton,
   id,
-  path,
   handleFavourite,
   handleEdit,
   handleDelete,
@@ -208,7 +203,6 @@ export const CustomTable = ({
   setCurrentPage,
   detailButton = true,
   children,
-  path,
   useManualPagination,
   handleFavourite,
   handleEdit,
@@ -333,7 +327,6 @@ export const CustomTable = ({
                     key={key}
                     data={data?.rowData}
                     id={data?.id}
-                    path={path}
                     detailButton={detailButton}
                     handleFavourite={handleFavourite}
                     handleEdit={handleEdit}
@@ -369,7 +362,7 @@ export const CustomTable = ({
               if (flag) {
                 return (
                   <Row
-                    className="p-3"
+                    className="p-3 justify-content-center"
                     key={key}
                     style={{
                       cursor: "pointer",
@@ -402,7 +395,6 @@ export const CustomTable = ({
                         rowData={row?.rowData}
                         tableHead={tableHead}
                         id={row?.id}
-                        path={path}
                         detailButton={detailButton}
                         handleFavourite={handleFavourite}
                         handleEdit={handleEdit}

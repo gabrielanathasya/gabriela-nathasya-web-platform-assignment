@@ -7,7 +7,13 @@ import MultipleInput from "components/MultipleInput"
 import validationSchema from "./validationSchema"
 import { Wrapper } from "./style"
 import SpinnerComponent from "components/Spinner"
-import { INSERT_CONTACT, GET_CONTACT_DETAIL } from "queries/contact"
+import {
+  INSERT_CONTACT,
+  GET_CONTACT_DETAIL,
+  EDIT_CONTACT,
+  EDIT_PHONE_NUMBER,
+  ADD_PHONE_NUMBER,
+} from "queries/contact"
 
 type ContactFormProps = {
   id: number | string | null
@@ -22,7 +28,7 @@ const ContactForm = ({ id, handleSubmitForm }: ContactFormProps) => {
     lastName: "",
     phones: [],
   })
-  const { unfilteredDataContact } = state.contact
+  const { unfilteredDataContact, detailData: detailDataState } = state.contact
 
   const { data: detailData, loading: loadingDetail } = useQuery(
     GET_CONTACT_DETAIL,
@@ -32,23 +38,48 @@ const ContactForm = ({ id, handleSubmitForm }: ContactFormProps) => {
       },
     }
   )
-  const [insertContact, { data, loading, error }] = useMutation(INSERT_CONTACT)
+
+  const [insertContact, { loading, error }] = useMutation(INSERT_CONTACT)
+
+  const [editContact, { loading: loadingEdit, error: errorEdit }] =
+    useMutation(EDIT_CONTACT)
+
+  const [
+    editPhoneNumber,
+    { loading: loadingEditPhone, error: errorEditPhone },
+  ] = useMutation(EDIT_PHONE_NUMBER)
+
+  const [addPhoneNumber, { loading: loadingAddPhone, error: errorAddPhone }] =
+    useMutation(ADD_PHONE_NUMBER)
 
   if (error) {
-    // console.error(`[FAIL INSERT CONTACT ${error.message}]`, error)
     alert("Insert Contact Failed")
+  }
+  if (errorEdit) {
+    alert("Edit Contact Failed")
+  }
+  if (errorEditPhone) {
+    alert("Remove phone number failed")
+  }
+  if (errorAddPhone) {
+    alert("Add phone number failed")
   }
 
   useEffect(() => {
     if (detailData) {
-      const phones = detailData?.phones?.map((phone: any) => phone.number)
-      setInitialValue({
-        firstName: detailData?.first_name || "",
-        lastName: detailData?.last_name || "",
-        phones: phones || [],
+      overmindActions.contact.setDetailData({
+        detailData,
       })
     }
   }, [detailData])
+
+  useEffect(() => {
+    setInitialValue({
+      firstName: detailDataState?.first_name || "",
+      lastName: detailDataState?.last_name || "",
+      phones: detailDataState?.phones || [],
+    })
+  }, [detailDataState])
 
   const onSubmitForm = (values: any, actions: any) => {
     if (values) {
@@ -58,22 +89,20 @@ const ContactForm = ({ id, handleSubmitForm }: ContactFormProps) => {
           item?.lastName === values?.lastName
       )
 
-      console.log("existingData", values?.firstName, values?.lastName, isExist)
-
       if (isExist) {
-        console.log("alert")
         alert("Name must be unique")
       } else {
         if (id) {
-          // EDIT
-          // overmindActions.cv
-          //   .update({ id, user_id: userId, ...values })
-          //   .then(() => {
-          //     window?.localStorage?.removeItem("work_values")
-          //     handleSubmitForm()
-          //   })
+          editContact({
+            variables: {
+              id,
+              _set: {
+                first_name: values?.firstName,
+                last_name: values?.lastName,
+              },
+            },
+          })
         } else {
-          // CREATE
           insertContact({
             variables: {
               first_name: values?.firstName,
@@ -112,21 +141,45 @@ const ContactForm = ({ id, handleSubmitForm }: ContactFormProps) => {
 
   const handleAddPhone = (phoneValue: string) => {
     if (phoneValue) {
-      const newArray: any = values?.phones
+      if (id) {
+        addPhoneNumber({
+          variables: {
+            contact_id: id,
+            phone_number: phoneValue,
+          },
+        })
+      }
+      const newArray: any = [...values?.phones]
       newArray.push(phoneValue)
       setFieldValue("phones", newArray)
     }
   }
 
   const handleRemovePhone = (index: number) => {
-    const newArray: any = values?.phones
+    // if (id) {
+    //   editPhoneNumber({
+    //     variables: {
+    //       pk_columns: {
+    //         number: values?.phones[index],
+    //         contact_id: id,
+    //       },
+    //       new_phone_number: "",
+    //     },
+    //   })
+    // }
+
+    const newArray: any = [...values?.phones]
     newArray?.splice(index, 1)
     setFieldValue("phones", newArray)
   }
 
   return (
     <Wrapper>
-      {(loading || loadingDetail) && <SpinnerComponent />}
+      {(loading ||
+        loadingDetail ||
+        loadingEdit ||
+        loadingEditPhone ||
+        loadingAddPhone) && <SpinnerComponent />}
       <Form onSubmit={handleSubmit} className="work-form">
         <Row>
           <Col sm={12} md={6} className="mb-3">
@@ -167,7 +220,7 @@ const ContactForm = ({ id, handleSubmitForm }: ContactFormProps) => {
             values={values?.phones}
             handleAddPhone={handleAddPhone}
             handleRemovePhone={handleRemovePhone}
-            isViewMode={false}
+            isViewMode={!!id}
           />
           {errors?.phones && (
             <Form.Text className="text-danger">
