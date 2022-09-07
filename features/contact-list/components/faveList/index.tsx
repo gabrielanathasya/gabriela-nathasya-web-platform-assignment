@@ -1,16 +1,23 @@
-import { Button, Container, Row, Col } from "react-bootstrap"
+import { Row, Col } from "react-bootstrap"
+import { useQuery, useMutation } from "@apollo/client"
 import { CustomTable } from "components/CustomTable"
 import { useEffect, useState } from "react"
 import { useAppState, useActions } from "data/overmind"
+import SpinnerComponent from "components/Spinner"
+import { GET_CONTACT_LIST } from "queries/contact"
 
 type FaveContactListProps = {
   handleEdit: (id: any) => void
   handleDelete: (id: any) => void
+  handleRefetch: () => void
+  faveIds: any
 }
 
 const FaveContactList = ({
   handleEdit,
   handleDelete,
+  handleRefetch,
+  faveIds,
 }: FaveContactListProps) => {
   const basePath = "contact"
   const state: any = useAppState()
@@ -18,7 +25,35 @@ const FaveContactList = ({
   const [page, setPage] = useState(1)
   const size = 5
   const { dataFaveContact } = state.contact
-  console.log({ dataFaveContact })
+
+  const { data: totalData, refetch: refetchTotal } = useQuery(
+    GET_CONTACT_LIST,
+    {
+      variables: {
+        where: { id: { _in: faveIds } },
+      },
+    }
+  )
+  const { loading, data, error } = useQuery(GET_CONTACT_LIST, {
+    variables: {
+      limit: size,
+      offset: (page - 1) * size,
+      where: { id: { _in: faveIds } },
+    },
+  })
+
+  if (error) {
+    console.error(`[FAIL GET CONTACT LIST ${error.message}]`, error)
+    alert("Get List Failed")
+  }
+
+  useEffect(() => {
+    if (data && totalData) {
+      overmindActions.contact.setFaveContactList({
+        data,
+      })
+    }
+  }, [data, totalData])
 
   const handlePrev = () => {
     if (page > 1) {
@@ -42,18 +77,16 @@ const FaveContactList = ({
     faveIds = faveIds ? JSON.parse(faveIds) : []
     faveIds = faveIds?.filter((item: any) => item !== id)
     window?.localStorage?.setItem("fave_ids", JSON.stringify(faveIds))
-
-    // overmindActions.contact.deleteById({ id }).then(() => {
-    //   fetchContacts()
-    // })
+    handleRefetch()
   }
 
   return (
     <Row className="mb-5">
+      {loading && <SpinnerComponent />}
       <Col>
         <Row className="align-items-center mb-3">
           <Col>
-            <h1>Favourite Contact List</h1>
+            <h1>Favourite List</h1>
           </Col>
         </Row>
         <Row>
@@ -72,7 +105,7 @@ const FaveContactList = ({
               path={basePath}
               detailButton={true}
               children={undefined}
-              useManualPagination={true}
+              useManualPagination={false}
               handleFavourite={handleUnfavourite}
               handleEdit={handleEdit}
               handleDelete={handleDelete}

@@ -16,21 +16,30 @@ const ContactList = () => {
   const overmindActions: any = useActions()
   const [searchTerm, setSearchTerm] = useState("")
   const [page, setPage] = useState(1)
-  const [favePage, setFavePage] = useState(1)
   const size = 10
-  const faveSize = 5
   const [isOpenForm, setIsOpenForm] = useState(false)
   const [editId, setEditId] = useState<any>(null)
+
+  const [faveIds, setFaveIds] = useState([])
+
   const { dataContact } = state.contact
+
   const variables = {
     limit: size,
     offset: (page - 1) * size,
     where: searchTerm
-      ? { first_name: { _like: `%${searchTerm}%` } }
-      : undefined,
+      ? { first_name: { _like: `%${searchTerm}%` }, id: { _nin: faveIds } }
+      : { id: { _nin: faveIds } },
   }
   const [deleteContact] = useMutation(DELETE_CONTACT)
-  const { data: totalData, refetch: refetchTotal } = useQuery(GET_CONTACT_LIST)
+  const { data: totalData, refetch: refetchTotal } = useQuery(
+    GET_CONTACT_LIST,
+    {
+      variables: {
+        where: { id: { _nin: faveIds } },
+      },
+    }
+  )
   const { loading, error, data, refetch } = useQuery(GET_CONTACT_LIST, {
     variables,
   })
@@ -41,15 +50,15 @@ const ContactList = () => {
   }
 
   useEffect(() => {
+    let faveIdsInit: any = window?.localStorage?.getItem("fave_ids")
+    faveIdsInit = faveIdsInit ? JSON.parse(faveIdsInit) : []
+    setFaveIds(faveIdsInit)
+  }, [])
+
+  useEffect(() => {
     if (data && totalData) {
-      let faveIds = window?.localStorage?.getItem("fave_ids")
-      faveIds = faveIds ? JSON.parse(faveIds) : []
       overmindActions.contact.setContactList({
-        totalData,
-        page,
-        size,
         data,
-        faveIds,
       })
     }
   }, [data, totalData])
@@ -74,55 +83,39 @@ const ContactList = () => {
     setIsOpenForm(true)
   }
 
-  const handleSubmitForm = () => {
+  const handleRefetch = () => {
     refetch({
       limit: size,
       offset: (page - 1) * size,
       where: searchTerm
-        ? { first_name: { _like: `%${searchTerm}%` } }
-        : undefined,
+        ? { first_name: { _like: `%${searchTerm}%` }, id: { _nin: faveIds } }
+        : { id: { _nin: faveIds } },
     })
     refetchTotal()
+  }
+
+  const handleSubmitForm = () => {
+    handleRefetch()
     setIsOpenForm(false)
   }
 
   const handleFavourite = (id: any) => {
     console.log("fave", { id })
 
-    let faveIds = window?.localStorage?.getItem("fave_ids")
-    faveIds = faveIds ? JSON.parse(faveIds) : []
-    window?.localStorage?.setItem("fave_ids", JSON.stringify(faveIds))
-
-    // overmindActions.contact.deleteById({ id }).then(() => {
-    //   fetchContacts()
-    // })
-  }
-
-  const handleUnfavourite = (id: any) => {
-    console.log("unfave", { id })
-
     let faveIds: any = window?.localStorage?.getItem("fave_ids")
     faveIds = faveIds ? JSON.parse(faveIds) : []
-    faveIds = faveIds?.filter((item: any) => item !== id)
+    faveIds?.push(id)
     window?.localStorage?.setItem("fave_ids", JSON.stringify(faveIds))
+    setFaveIds(faveIds)
 
-    // overmindActions.contact.deleteById({ id }).then(() => {
-    //   fetchContacts()
-    // })
+    handleRefetch()
   }
 
   const handleDelete = (id: any) => {
     deleteContact({
       variables: { id },
     }).then(() => {
-      refetch({
-        limit: size,
-        offset: (page - 1) * size,
-        where: searchTerm
-          ? { first_name: { _like: `%${searchTerm}%` } }
-          : undefined,
-      })
-      refetchTotal()
+      handleRefetch()
     })
   }
 
@@ -138,7 +131,12 @@ const ContactList = () => {
   return (
     <Container className="px-md-5 py-md-5 mt-3">
       {loading && <SpinnerComponent />}
-      <FaveContactList handleEdit={handleEdit} handleDelete={handleDelete} />
+      <FaveContactList
+        handleEdit={handleEdit}
+        handleDelete={handleDelete}
+        handleRefetch={handleRefetch}
+        faveIds={faveIds}
+      />
 
       <Row>
         <Col>
