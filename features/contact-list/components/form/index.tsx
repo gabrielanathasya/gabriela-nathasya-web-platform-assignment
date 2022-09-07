@@ -11,7 +11,6 @@ import {
   INSERT_CONTACT,
   GET_CONTACT_DETAIL,
   EDIT_CONTACT,
-  EDIT_PHONE_NUMBER,
   ADD_PHONE_NUMBER,
 } from "queries/contact"
 
@@ -44,10 +43,10 @@ const ContactForm = ({ id, handleSubmitForm }: ContactFormProps) => {
   const [editContact, { loading: loadingEdit, error: errorEdit }] =
     useMutation(EDIT_CONTACT)
 
-  const [
-    editPhoneNumber,
-    { loading: loadingEditPhone, error: errorEditPhone },
-  ] = useMutation(EDIT_PHONE_NUMBER)
+  // const [
+  //   editPhoneNumber,
+  //   { loading: loadingEditPhone, error: errorEditPhone },
+  // ] = useMutation(EDIT_PHONE_NUMBER)
 
   const [addPhoneNumber, { loading: loadingAddPhone, error: errorAddPhone }] =
     useMutation(ADD_PHONE_NUMBER)
@@ -58,9 +57,9 @@ const ContactForm = ({ id, handleSubmitForm }: ContactFormProps) => {
   if (errorEdit) {
     alert("Edit Contact Failed")
   }
-  if (errorEditPhone) {
-    alert("Remove phone number failed")
-  }
+  // if (errorEditPhone) {
+  //   alert("Remove phone number failed")
+  // }
   if (errorAddPhone) {
     alert("Add phone number failed")
   }
@@ -175,11 +174,9 @@ const ContactForm = ({ id, handleSubmitForm }: ContactFormProps) => {
 
   return (
     <Wrapper>
-      {(loading ||
-        loadingDetail ||
-        loadingEdit ||
-        loadingEditPhone ||
-        loadingAddPhone) && <SpinnerComponent />}
+      {(loading || loadingDetail || loadingEdit || loadingAddPhone) && (
+        <SpinnerComponent />
+      )}
       <Form onSubmit={handleSubmit} className="work-form">
         <Row>
           <Col sm={12} md={6} className="mb-3">
